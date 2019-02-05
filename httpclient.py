@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,6 +41,11 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
+        request_text = req.splitlines()[0].decode("utf-8")
+        # print(request_text)
+        #request_text = request_text.rstrip('\r\n ')
+        #print(request_text)
+        self.request_method, self.line, self.version = request_text.split()
         return None
 
     def get_headers(self,data):
@@ -48,10 +53,11 @@ class HTTPClient(object):
 
     def get_body(self, data):
         return None
-    
+
     def sendall(self, data):
-        self.socket.sendall(data.encode('utf-8'))
-        
+        data = "GET / HTTP/1.1\nHost: {}\n\n".format(self.url_parse.netloc)
+        self.socket.sendall(bytearray(data,'utf-8'))
+
     def close(self):
         self.socket.close()
 
@@ -70,6 +76,12 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
+        self.url_parse = urllib.parse.urlparse(url)
+        self.connect(self.url_parse.netloc,80)
+        self.sendall(" ")
+        buffer = self.recvall(self.socket)
+        # print(url_parse.netloc)
+        print(buffer)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
@@ -82,7 +94,7 @@ class HTTPClient(object):
             return self.POST( url, args )
         else:
             return self.GET( url, args )
-    
+
 if __name__ == "__main__":
     client = HTTPClient()
     command = "GET"
