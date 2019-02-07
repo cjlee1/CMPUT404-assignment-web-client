@@ -21,6 +21,7 @@
 import sys
 import socket
 import re
+import urllib
 # you may use urllib to encode data appropriately
 import urllib.parse
 
@@ -41,21 +42,30 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        request_text = req.splitlines()[0].decode("utf-8")
-        # print(request_text)
-        #request_text = request_text.rstrip('\r\n ')
-        #print(request_text)
-        self.request_method, self.line, self.version = request_text.split()
-        return None
+        if not data:
+            code = 400
+        else:
+            code = int(data.split(" ")[1])
+        return code
 
     def get_headers(self,data):
-        return None
+        if not data:
+            headers = ""
+        else:
+            headers = data.split("\r\n\r\n")[0]
+        return headers
 
     def get_body(self, data):
-        return None
+        print(data)
+        if not data:
+            body = ""
+        else:
+            body = data.split("\r\n\r\n")[1]
+        print(body)
+        return body
 
     def sendall(self, data):
-        data = "GET / HTTP/1.1\nHost: {}\n\n".format(self.url_parse.netloc)
+        # data = "GET / HTTP/1.1\nHost: {}\n\n".format(self.url_parse.netloc)
         self.socket.sendall(bytearray(data,'utf-8'))
 
     def close(self):
@@ -76,17 +86,87 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
-        self.url_parse = urllib.parse.urlparse(url)
-        self.connect(self.url_parse.netloc,80)
-        self.sendall(" ")
+        # print(url)
+        if "http" in url or "https" in url:
+          #  print("hi")
+            self.url_parse = urllib.parse.urlparse(url)
+        else:
+         #   print("bye")
+            url = "http://"+ url
+            self.url_parse = urllib.parse.urlparse(url)
+
+        self.path = self. url_parse.path
+        if not self.path:
+            self.path = "/"
+        #print(self.url_parse.hostname)
+        #print(self.url_parse.port)
+        self.port = self.url_parse.port
+        if not self.url_parse.port:
+            self.port = 80
+
+        self.connect(self.url_parse.hostname, self.port)
+
+
+        request = "GET {} HTTP/1.1\r\nHost: {}\r\nAccept: */*\r\nConnection: Close\r\n\r\n".format(self.path,self.url_parse.hostname)
+        self.sendall(request)
         buffer = self.recvall(self.socket)
-        # print(url_parse.netloc)
-        print(buffer)
+        #   print(url_parse.netloc)s
+        # print(buffer)
+        # print(buffer.split("\r\n\r\n"))
+        body = self.get_body(buffer)
+        code = self.get_code(buffer)
+        #print(code,1033)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
         code = 500
         body = ""
+
+        if "http" in url or "https" in url:
+          #  print("hi")
+            self.url_parse = urllib.parse.urlparse(url)
+        else:
+         #   print("bye")
+            url = "http://"+ url
+            self.url_parse = urllib.parse.urlparse(url)
+
+        # self.url_parse = urllib.parse.urlparse(url)
+        self.path = self. url_parse.path
+        if not self.path:
+            self.path = "/"
+        # print(self.url_parse.hostname)
+        # print(self.url_parse.port)
+        self.connect(self.url_parse.hostname, self.url_parse.port)
+        content_type = "application/x-www-form-urlencoded"
+        if args == None:
+            encode_content =""
+            content_len = 0
+        else:
+            encode_content=""
+            for key in args:
+            #     print(key,args[key],20000)
+                 content= "{}={}&".format(key,args[key])
+             #    print(content,11111111)
+                 encode_content += content
+            
+            #print(encode_content,"be")
+            encode_content = encode_content.rstrip("&")
+            #print(encode_content,"FE")
+            #encode_content = urllib.parse.urlencode(args)
+            content_len = str(len(encode_content))
+        #print("\n"+encode_content,100000000000000000000)
+        #print(args)
+        request = "POST {} HTTP/1.1\r\nHost: {}\r\nAccept: */*\r\nContent-Length: {}\r\nContent-Type:{}\r\nConnection: Close\r\n\r\n{}\r\n\r\n".format(self.path,self.url_parse.hostname,content_len, content_type,encode_content)
+        #request = request + encode_content + "\r\n\r\n"
+        #print(request,2000000000000000000000000000)
+        self.sendall(request)
+        buffer = self.recvall(self.socket)
+        #   print(url_parse.netloc)s
+        #print(buffer, 00)
+        # print(buffer.split("\r\n\r\n"))
+        body = self.get_body(buffer)
+        code = self.get_code(buffer)
+        #print(body,103333333333)
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
