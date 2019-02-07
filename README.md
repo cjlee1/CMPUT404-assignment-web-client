@@ -9,12 +9,19 @@ Make a simple web-client like curl or wget
 
 Contributors / Licensing
 ========================
+httpclient.py contains contributions from:
 
-Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle, 
+* Abram Hindle
+* Calvin LEE
+
+Collaboration from:
+* Simon Chau
+  * Talked about Requirements for the assignment and how web clients worked
+
+Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle,calvin lee
 https://github.com/tywtyw2002, and https://github.com/treedust
 
 But the server.py example is derived from the python documentation
 examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
-

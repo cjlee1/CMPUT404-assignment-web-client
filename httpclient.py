@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
+# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust, Calvin Lee
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,12 +56,12 @@ class HTTPClient(object):
         return headers
 
     def get_body(self, data):
-        print(data)
+        #print(data)
         if not data:
             body = ""
         else:
             body = data.split("\r\n\r\n")[1]
-        print(body)
+        #print(body)
         return body
 
     def sendall(self, data):
@@ -148,7 +148,7 @@ class HTTPClient(object):
                  content= "{}={}&".format(key,args[key])
              #    print(content,11111111)
                  encode_content += content
-            
+
             #print(encode_content,"be")
             encode_content = encode_content.rstrip("&")
             #print(encode_content,"FE")
